@@ -2,7 +2,9 @@ require('dotenv').config();
 const twilio = require('twilio');
 const cors = require('cors');
 const express = require('express');
+const http = require('http')
 const app = express();
+const socketIO = require("socket.io");
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -42,5 +44,21 @@ app.get('/check/:to/:code', async (req, res) => {
       res.json(err)
     })
 })
+
+
+const server = http.createServer(app);
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  socket.on("request:sent", (data) => {
+    socket.broadcast.emit("request:recieved", data);
+  })
+})
+
 console.log(port);
 app.listen(port)
