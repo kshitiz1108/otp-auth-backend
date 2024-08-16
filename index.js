@@ -31,18 +31,19 @@ app.get('/verify/:to', async (req, res) => {
     })
 })
 
+
 app.get('/check/:to/:code', async (req, res) => {
   const to = req.params.to
   const code = req.params.code
   client.verify
-    .services(serviceId)
-    .verificationChecks.create({ to, code })
-    .then((verification) => {
-      res.json(verification)
-    })
-    .catch((err) => {
-      res.json(err)
-    })
+  .services(serviceId)
+  .verificationChecks.create({ to, code })
+  .then((verification) => {
+    res.json(verification)
+  })
+  .catch((err) => {
+    res.json(err)
+  })
 })
 
 
@@ -54,11 +55,15 @@ const io = socketIO(server, {
   },
 });
 
+const data_list = []
 io.on("connection", (socket) => {
+  console.log("connected")
   socket.on("request:sent", (data) => {
-    socket.broadcast.emit("request:recieved", data);
+    console.log(data);
+    data_list.push(data)
   })
+  socket.broadcast.emit("request:recieved", data_list);
 })
 
 console.log(port);
-app.listen(port)
+server.listen(port)
